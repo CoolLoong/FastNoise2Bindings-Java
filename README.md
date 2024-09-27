@@ -5,7 +5,7 @@ Java bindings for [FastNoise2](https://github.com/Auburn/FastNoise2) noise gener
 Uses the metadata system in FastNoise2 to reference node types and variable names, this means the bindings don't need to
 updated when there are new/changed nodes/variables in FastNoise2
 
-[Example usage](https://github.com/Auburn/FastNoise2Bindings/blob/master/src/test/java/com/github/fastnoise/FastNoiseTest.java)
+[Example usage](https://github.com/CoolLoong/FastNoise2Bindings-Java/blob/master/src/test/java/com/github/fastnoise/FastNoiseTest.java)
 
 ## Usage
 You can add this library to your project using JitPack.
