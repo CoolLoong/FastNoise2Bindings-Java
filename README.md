@@ -8,8 +8,18 @@ updated when there are new/changed nodes/variables in FastNoise2
 [Example usage](https://github.com/Auburn/FastNoise2Bindings/blob/master/src/test/java/com/github/fastnoise/FastNoiseTest.java)
 
 ## Usage
-
 You can add this library to your project using JitPack.
+
+### Requirements
+
+1. **Minimum JDK Version:** JDK 23
+2. **Supported Platforms:**
+
+| Platform | Architecture |
+|----------|--------------|
+| Windows  | x86_64       |
+| Linux    | x86_64       |
+| macOS    | x86_64       |
 
 ### Gradle (Kotlin DSL)
 
