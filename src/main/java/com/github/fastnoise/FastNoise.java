@@ -190,7 +190,7 @@ public class FastNoise implements AutoCloseable {
     }
 
     private static String determineDylibSuffix() {
-        if (OS.startsWith("darwin")) {
+        if (OS.startsWith("mac") || OS.startsWith("darwin")) {
             return ".dylib";
         } else if (OS.startsWith("win")) {
             return ".dll";
