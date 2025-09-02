@@ -31,7 +31,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.CoolLoong:FastNoise2Bindings-Java:0.0.1")
+    implementation("com.github.CoolLoong:FastNoise2Bindings-Java:0.0.2")
 }
 ```
 
@@ -48,7 +48,7 @@ dependencies {
     <dependency>
         <groupId>com.github.CoolLoong</groupId>
         <artifactId>FastNoise2Bindings-Java</artifactId>
-        <version>0.0.1</version>
+        <version>0.0.2</version>
     </dependency>
 </dependencies>
 ```
