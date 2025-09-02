@@ -15,11 +15,11 @@ You can add this library to your project using JitPack.
 1. **Minimum JDK Version:** JDK 23
 2. **Supported Platforms:**
 
-| Platform | Architecture |
-|----------|--------------|
-| Windows  | x86_64       |
-| Linux    | x86_64       |
-| macOS    | x86_64       |
+| Platform | Architecture  |
+|----------|---------------|
+| Windows  | x86_64        |
+| Linux    | x86_64        |
+| macOS    | arm64, x86_64 |
 
 ### Gradle (Kotlin DSL)
 
