@@ -125,7 +125,7 @@ public class FastNoise implements AutoCloseable {
     static final MethodHandle fnNewFromMetadata;
     static final MethodHandle fnNewFromEncodedNodeTree;
     static final MethodHandle fnDeleteNodeRef;
-    static final MethodHandle fnGetSIMDLevel;
+    static final MethodHandle fnGetActiveFeatureSet;
     static final MethodHandle fnGetMetadataID;
     static final MethodHandle fnGenUniformGrid2D;
     static final MethodHandle fnGenUniformGrid3D;
@@ -252,8 +252,8 @@ public class FastNoise implements AutoCloseable {
                 FunctionDescriptor.ofVoid(C_POINTER)
         );
 
-        fnGetSIMDLevel = linker.downcallHandle(
-                lookup.find("fnGetSIMDLevel").orElseThrow(),
+        fnGetActiveFeatureSet = linker.downcallHandle(
+                lookup.find("fnGetActiveFeatureSet").orElseThrow(),
                 FunctionDescriptor.of(JAVA_INT, C_POINTER)
         );
 
@@ -264,33 +264,37 @@ public class FastNoise implements AutoCloseable {
 
         fnGenUniformGrid2D = linker.downcallHandle(
                 lookup.find("fnGenUniformGrid2D").orElseThrow(),
-                FunctionDescriptor.of(JAVA_INT, C_POINTER, C_POINTER,
+                FunctionDescriptor.ofVoid(C_POINTER, C_POINTER,
+                        JAVA_FLOAT, JAVA_FLOAT,
                         JAVA_INT, JAVA_INT,
-                        JAVA_INT, JAVA_INT,
-                        JAVA_FLOAT, JAVA_INT, C_POINTER)
+                        JAVA_FLOAT, JAVA_FLOAT,
+                        JAVA_INT, C_POINTER)
         );
 
         fnGenUniformGrid3D = linker.downcallHandle(
                 lookup.find("fnGenUniformGrid3D").orElseThrow(),
-                FunctionDescriptor.of(JAVA_INT, C_POINTER, C_POINTER,
+                FunctionDescriptor.ofVoid(C_POINTER, C_POINTER,
+                        JAVA_FLOAT, JAVA_FLOAT, JAVA_FLOAT,
                         JAVA_INT, JAVA_INT, JAVA_INT,
-                        JAVA_INT, JAVA_INT, JAVA_INT,
-                        JAVA_FLOAT, JAVA_INT, C_POINTER)
+                        JAVA_FLOAT, JAVA_FLOAT, JAVA_FLOAT,
+                        JAVA_INT, C_POINTER)
         );
 
         fnGenUniformGrid4D = linker.downcallHandle(
                 lookup.find("fnGenUniformGrid4D").orElseThrow(),
-                FunctionDescriptor.of(JAVA_INT, C_POINTER, C_POINTER,
+                FunctionDescriptor.ofVoid(C_POINTER, C_POINTER,
+                        JAVA_FLOAT, JAVA_FLOAT, JAVA_FLOAT, JAVA_FLOAT,
                         JAVA_INT, JAVA_INT, JAVA_INT, JAVA_INT,
-                        JAVA_INT, JAVA_INT, JAVA_INT, JAVA_INT,
-                        JAVA_FLOAT, JAVA_INT, C_POINTER)
+                        JAVA_FLOAT, JAVA_FLOAT, JAVA_FLOAT, JAVA_FLOAT,
+                        JAVA_INT, C_POINTER)
         );
 
         fnGenTileable2D = linker.downcallHandle(
                 lookup.find("fnGenTileable2D").orElseThrow(),
                 FunctionDescriptor.ofVoid(C_POINTER, C_POINTER,
                         JAVA_INT, JAVA_INT,
-                        JAVA_FLOAT, JAVA_INT, C_POINTER)
+                        JAVA_FLOAT, JAVA_FLOAT,
+                        JAVA_INT, C_POINTER)
         );
 
         fnGenPositionArray2D = linker.downcallHandle(
@@ -441,7 +445,7 @@ public class FastNoise implements AutoCloseable {
         mMetadataId = metadataId;
 
         try {
-            mNodeHandle = fnNewFromMetadata(mMetadataId, (short) 0);
+            mNodeHandle = fnNewFromMetadata(mMetadataId, -1);
         } catch (Throwable e) {
             throw new ExternalLibraryException(e);
         }
@@ -458,7 +462,7 @@ public class FastNoise implements AutoCloseable {
     }
 
     public static FastNoise fromEncodedNodeTree(String encodedNodeTree) {
-        MemorySegment nodeHandle = fnNewFromEncodedNodeTree(encodedNodeTree, 0);
+        MemorySegment nodeHandle = fnNewFromEncodedNodeTree(encodedNodeTree, -1);
 
         if (nodeHandle.equals(MemorySegment.NULL)) {
             return null;
@@ -469,7 +473,7 @@ public class FastNoise implements AutoCloseable {
 
     public int getSIMDLevel() {
         try {
-            return (int) fnGetSIMDLevel.invokeExact(mNodeHandle);
+            return (int) fnGetActiveFeatureSet.invokeExact(mNodeHandle);
         } catch (Throwable e) {
             throw new ExternalLibraryException(e);
         }
@@ -536,25 +540,37 @@ public class FastNoise implements AutoCloseable {
 
     public OutputMinMax genUniformGrid2D(FloatArray noiseOut, int xStart, int yStart, int xSize, int ySize, float frequency, int seed) {
         final var minMax = new FloatArray(2);
-        fnGenUniformGrid2D(mNodeHandle, noiseOut, xStart, yStart, xSize, ySize, frequency, seed, minMax);
+        fnGenUniformGrid2D(mNodeHandle, noiseOut,
+                xStart * frequency, yStart * frequency,
+                xSize, ySize,
+                frequency, frequency,
+                seed, minMax);
         return new OutputMinMax(minMax);
     }
 
     public OutputMinMax genUniformGrid3D(FloatArray noiseOut, int xStart, int yStart, int zStart, int xSize, int ySize, int zSize, float frequency, int seed) {
         final FloatArray minMax = new FloatArray(2);
-        fnGenUniformGrid3D(mNodeHandle, noiseOut, xStart, yStart, zStart, xSize, ySize, zSize, frequency, seed, minMax);
+        fnGenUniformGrid3D(mNodeHandle, noiseOut,
+                xStart * frequency, yStart * frequency, zStart * frequency,
+                xSize, ySize, zSize,
+                frequency, frequency, frequency,
+                seed, minMax);
         return new OutputMinMax(minMax);
     }
 
     public OutputMinMax genUniformGrid4D(FloatArray noiseOut, int xStart, int yStart, int zStart, int wStart, int xSize, int ySize, int zSize, int wSize, float frequency, int seed) {
         final FloatArray minMax = new FloatArray(2);
-        fnGenUniformGrid4D(mNodeHandle, noiseOut, xStart, yStart, zStart, wStart, xSize, ySize, zSize, wSize, frequency, seed, minMax);
+        fnGenUniformGrid4D(mNodeHandle, noiseOut,
+                xStart * frequency, yStart * frequency, zStart * frequency, wStart * frequency,
+                xSize, ySize, zSize, wSize,
+                frequency, frequency, frequency, frequency,
+                seed, minMax);
         return new OutputMinMax(minMax);
     }
 
     public OutputMinMax genTileable2D(FloatArray noiseOut, int xSize, int ySize, float frequency, int seed) {
         final FloatArray minMax = new FloatArray(2);
-        fnGenTileable2D(mNodeHandle, noiseOut, xSize, ySize, frequency, seed, minMax);
+        fnGenTileable2D(mNodeHandle, noiseOut, xSize, ySize, frequency, frequency, seed, minMax);
         return new OutputMinMax(minMax);
     }
 
@@ -682,18 +698,18 @@ public class FastNoise implements AutoCloseable {
         }
     }
 
-    static MemorySegment fnNewFromMetadata(int id, int simdLevel) {
+    static MemorySegment fnNewFromMetadata(int id, int maxFeatureSet) {
         try {
-            return (MemorySegment) fnNewFromMetadata.invokeExact(id, simdLevel);//void point
+            return (MemorySegment) fnNewFromMetadata.invokeExact(id, maxFeatureSet);//void point
         } catch (Throwable e) {
             throw new ExternalLibraryException(e);
         }
     }
 
-    static MemorySegment fnNewFromEncodedNodeTree(String encodedString, int simdLevel) {
+    static MemorySegment fnNewFromEncodedNodeTree(String encodedString, int maxFeatureSet) {
         try (Arena arena = Arena.ofConfined()) {
             final MemorySegment encodedNodeTreeSegment = arena.allocateFrom(encodedString);
-            return (MemorySegment) fnNewFromEncodedNodeTree.invokeExact(encodedNodeTreeSegment, simdLevel);
+            return (MemorySegment) fnNewFromEncodedNodeTree.invokeExact(encodedNodeTreeSegment, maxFeatureSet);
         } catch (Throwable e) {
             throw new ExternalLibraryException(e);
         }
@@ -707,9 +723,9 @@ public class FastNoise implements AutoCloseable {
         }
     }
 
-    static int fnGetSIMDLevel(MemorySegment nodeHandle) {
+    static int fnGetActiveFeatureSet(MemorySegment nodeHandle) {
         try {
-            return (int) fnGetSIMDLevel.invokeExact(nodeHandle);
+            return (int) fnGetActiveFeatureSet.invokeExact(nodeHandle);
         } catch (Throwable e) {
             throw new ExternalLibraryException(e);
         }
@@ -723,40 +739,49 @@ public class FastNoise implements AutoCloseable {
         }
     }
 
-    static int fnGenUniformGrid2D(MemorySegment nodeHandle, FloatArray noiseOut,
-                                  int xStart, int yStart,
-                                  int xSize, int ySize,
-                                  float frequency, int seed, FloatArray outputMinMax) {
+    static void fnGenUniformGrid2D(MemorySegment nodeHandle, FloatArray noiseOut,
+                                   float xOffset, float yOffset,
+                                   int xCount, int yCount,
+                                   float xStepSize, float yStepSize,
+                                   int seed, FloatArray outputMinMax) {
         try {
-            return (int) fnGenUniformGrid2D.invokeExact(nodeHandle, noiseOut.getSegment(), xStart, yStart, xSize, ySize, frequency, seed, outputMinMax.getSegment());
+            fnGenUniformGrid2D.invokeExact(nodeHandle, noiseOut.getSegment(),
+                    xOffset, yOffset,
+                    xCount, yCount,
+                    xStepSize, yStepSize,
+                    seed, outputMinMax.getSegment());
         } catch (Throwable e) {
             throw new ExternalLibraryException(e);
         }
     }
 
-    static int fnGenUniformGrid3D(MemorySegment nodeHandle, FloatArray noiseOut,
-                                  int xStart, int yStart, int zStart,
-                                  int xSize, int ySize, int zSize,
-                                  float frequency, int seed, FloatArray outputMinMax) {
+    static void fnGenUniformGrid3D(MemorySegment nodeHandle, FloatArray noiseOut,
+                                   float xOffset, float yOffset, float zOffset,
+                                   int xCount, int yCount, int zCount,
+                                   float xStepSize, float yStepSize, float zStepSize,
+                                   int seed, FloatArray outputMinMax) {
         try {
-            return (int) fnGenUniformGrid3D.invokeExact(nodeHandle, noiseOut.getSegment(),
-                    xStart, yStart, zStart,
-                    xSize, ySize, zSize,
-                    frequency, seed, outputMinMax.getSegment());
+            fnGenUniformGrid3D.invokeExact(nodeHandle, noiseOut.getSegment(),
+                    xOffset, yOffset, zOffset,
+                    xCount, yCount, zCount,
+                    xStepSize, yStepSize, zStepSize,
+                    seed, outputMinMax.getSegment());
         } catch (Throwable e) {
             throw new ExternalLibraryException(e);
         }
     }
 
-    static int fnGenUniformGrid4D(MemorySegment nodeHandle, FloatArray noiseOut,
-                                  int xStart, int yStart, int zStart, int wStart,
-                                  int xSize, int ySize, int zSize, int wSize,
-                                  float frequency, int seed, FloatArray outputMinMax) {
+    static void fnGenUniformGrid4D(MemorySegment nodeHandle, FloatArray noiseOut,
+                                   float xOffset, float yOffset, float zOffset, float wOffset,
+                                   int xCount, int yCount, int zCount, int wCount,
+                                   float xStepSize, float yStepSize, float zStepSize, float wStepSize,
+                                   int seed, FloatArray outputMinMax) {
         try {
-            return (int) fnGenUniformGrid4D.invokeExact(nodeHandle, noiseOut.getSegment(),
-                    xStart, yStart, zStart, wStart,
-                    xSize, ySize, zSize, wSize,
-                    frequency, seed, outputMinMax.getSegment());
+            fnGenUniformGrid4D.invokeExact(nodeHandle, noiseOut.getSegment(),
+                    xOffset, yOffset, zOffset, wOffset,
+                    xCount, yCount, zCount, wCount,
+                    xStepSize, yStepSize, zStepSize, wStepSize,
+                    seed, outputMinMax.getSegment());
         } catch (Throwable e) {
             throw new ExternalLibraryException(e);
         }
@@ -764,9 +789,13 @@ public class FastNoise implements AutoCloseable {
 
     static void fnGenTileable2D(MemorySegment nodeHandle, FloatArray noiseOut,
                                 int xSize, int ySize,
-                                float frequency, int seed, FloatArray outputMinMax) {
+                                float xStepSize, float yStepSize,
+                                int seed, FloatArray outputMinMax) {
         try {
-            fnGenTileable2D.invokeExact(nodeHandle, noiseOut.getSegment(), xSize, ySize, frequency, seed, outputMinMax.getSegment());
+            fnGenTileable2D.invokeExact(nodeHandle, noiseOut.getSegment(),
+                    xSize, ySize,
+                    xStepSize, yStepSize,
+                    seed, outputMinMax.getSegment());
         } catch (Throwable e) {
             throw new ExternalLibraryException(e);
         }

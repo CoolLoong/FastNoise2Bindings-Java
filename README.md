@@ -12,7 +12,7 @@ You can add this library to your project using JitPack.
 
 ### Requirements
 
-1. **Minimum JDK Version:** JDK 23
+1. **JDK Version:** JDK 23 or later
 2. **Supported Platforms:**
 
 | Platform | Architecture  |
@@ -31,7 +31,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.CoolLoong:FastNoise2Bindings-Java:0.0.2")
+    implementation("com.github.CoolLoong:FastNoise2Bindings-Java:0.0.3")
 }
 ```
 
@@ -48,7 +48,7 @@ dependencies {
     <dependency>
         <groupId>com.github.CoolLoong</groupId>
         <artifactId>FastNoise2Bindings-Java</artifactId>
-        <version>0.0.2</version>
+        <version>0.0.3</version>
     </dependency>
 </dependencies>
 ```

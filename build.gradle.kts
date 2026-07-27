@@ -4,10 +4,10 @@ plugins {
 }
 
 group = "org.github.fastnoise"
-version = "0.0.2"
+version = "0.0.3"
 
-java.toolchain {
-    languageVersion.set(JavaLanguageVersion.of(23))
+tasks.withType<JavaCompile>().configureEach {
+    options.release.set(23)
 }
 
 repositories {
@@ -17,6 +17,7 @@ repositories {
 dependencies {
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.wrapper {
@@ -44,7 +45,7 @@ publishing {
             pom {
                 name.set("FastNoise2Bindings-Java")
                 description.set("Bindings for FastNoise2 in Java.")
-                url.set("https://github.com/CoolLoong/FastNoise2Bindings-Java") // 替换为您的项目 URL
+                url.set("https://github.com/CoolLoong/FastNoise2Bindings-Java")
 
                 licenses {
                     license {
